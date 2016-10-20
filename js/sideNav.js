@@ -22,8 +22,11 @@
         // Add Touch Area
         var $dragTarget;
         if (options.draggable) {
-          $dragTarget = $('<div class="drag-target"></div>').attr('data-sidenav', $this.attr('data-activates'));
-          $('body').append($dragTarget);
+          $dragTarget = $('[data-sidenav="' + $this.attr('data-activates') + '"]');
+          if ($dragTarget.length === 0) {
+            $dragTarget = $('<div class="drag-target"></div>').attr('data-sidenav', $this.attr('data-activates'));
+            $('body').append($dragTarget);
+          }
         } else {
           $dragTarget = $();
         }
@@ -297,13 +300,23 @@
 
             // Disable Scrolling
             var $body = $('body');
-            var $overlay = $('<div id="sidenav-overlay"></div>');
+            var $overlay = $('#sidenav-overlay');
+            if ($overlay.length === 0) {
+              $overlay = $('<div id="sidenav-overlay"></div>');
+              $('body').append($overlay);
+            }
             var oldWidth = $body.innerWidth();
             $body.css('overflow', 'hidden');
             $body.width(oldWidth);
 
             // Push current drag target on top of DOM tree
-            $('body').append($dragTarget);
+            var $dragTarget = $('[data-sidenav="' + $this.attr('data-activates') + '"]');
+            if (options.draggable) {
+              if ($dragTarget.length === 0) {
+                $dragTarget = $('<div class="drag-target"></div>').attr('data-sidenav', $this.attr('data-activates'));
+                $('body').append($dragTarget);
+              }
+            }
 
             if (options.edge === 'left') {
               $dragTarget.css({width: '50%', right: 0, left: ''});
@@ -325,7 +338,6 @@
                 } });
 
             });
-            $('body').append($overlay);
             $overlay.velocity({opacity: 1}, {duration: 300, queue: false, easing: 'easeOutQuad',
               complete: function () {
                 menuOut = true;
