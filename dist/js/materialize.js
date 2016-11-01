@@ -1,5 +1,5 @@
 /*!
- * Materialize v0.97.8 (http://materializecss.com)
+ * Materialize vundefined (http://materializecss.com)
  * Copyright 2014-2015 Materialize
  * MIT License (https://raw.githubusercontent.com/Dogfalo/materialize/master/LICENSE)
  */
@@ -821,7 +821,7 @@ if (jQuery) {
           $modal.removeClass('open');
 
           // Enable scrolling
-          $('body').css({
+          $modal.parent().css({
             overflow: '',
             width: ''
           });
@@ -861,7 +861,7 @@ if (jQuery) {
         };
 
         var openModal = function($trigger) {
-          var $body = $('body');
+          var $body = $modal.parent();
           var oldWidth = $body.innerWidth();
           $body.css('overflow', 'hidden');
           $body.width(oldWidth);
@@ -879,7 +879,7 @@ if (jQuery) {
           $modal.data('overlay-id', overlayID).css('z-index', 1000 + lStack * 2 + 1);
           $modal.addClass('open');
 
-          $("body").append($overlay);
+          $modal.parent().append($overlay);
 
           if (options.dismissible) {
             $overlay.click(function() {
@@ -2197,8 +2197,11 @@ $(document).ready(function(){
         // Add Touch Area
         var $dragTarget;
         if (options.draggable) {
-          $dragTarget = $('<div class="drag-target"></div>').attr('data-sidenav', $this.attr('data-activates'));
-          $('body').append($dragTarget);
+          $dragTarget = $('[data-sidenav="' + $this.attr('data-activates') + '"]');
+          if ($dragTarget.length === 0) {
+            $dragTarget = $('<div class="drag-target"></div>').attr('data-sidenav', $this.attr('data-activates'));
+            $('body').append($dragTarget);
+          }
         } else {
           $dragTarget = $();
         }
@@ -2472,13 +2475,23 @@ $(document).ready(function(){
 
             // Disable Scrolling
             var $body = $('body');
-            var $overlay = $('<div id="sidenav-overlay"></div>');
+            var $overlay = $('#sidenav-overlay');
+            if ($overlay.length === 0) {
+              $overlay = $('<div id="sidenav-overlay"></div>');
+              $('body').append($overlay);
+            }
             var oldWidth = $body.innerWidth();
             $body.css('overflow', 'hidden');
             $body.width(oldWidth);
 
             // Push current drag target on top of DOM tree
-            $('body').append($dragTarget);
+            var $dragTarget = $('[data-sidenav="' + $this.attr('data-activates') + '"]');
+            if (options.draggable) {
+              if ($dragTarget.length === 0) {
+                $dragTarget = $('<div class="drag-target"></div>').attr('data-sidenav', $this.attr('data-activates'));
+                $('body').append($dragTarget);
+              }
+            }
 
             if (options.edge === 'left') {
               $dragTarget.css({width: '50%', right: 0, left: ''});
@@ -2500,7 +2513,6 @@ $(document).ready(function(){
                 } });
 
             });
-            $('body').append($overlay);
             $overlay.velocity({opacity: 1}, {duration: 300, queue: false, easing: 'easeOutQuad',
               complete: function () {
                 menuOut = true;
